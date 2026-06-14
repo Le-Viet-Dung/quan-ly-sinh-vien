@@ -1,0 +1,24 @@
+{
+  "name": "quan-ly-sinh-vien",
+  "version": "1.0.0",
+  "description": "``` npm i -g @nestjs/cli",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Le-Viet-Dung/quan-ly-sinh-vien.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Le-Viet-Dung/quan-ly-sinh-vien/issues"
+  },
+  "homepage": "https://github.com/Le-Viet-Dung/quan-ly-sinh-vien#readme",
+  "dependencies": {
+    "typeorm": "^1.0.0"
+  }
+}
