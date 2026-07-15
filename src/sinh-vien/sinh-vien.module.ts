@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { SinhVienController } from './sinh-vien.controller';
 
-@Module({})
+@Module({
+  controllers: [SinhVienController]
+})
 export class SinhVienModule {}
