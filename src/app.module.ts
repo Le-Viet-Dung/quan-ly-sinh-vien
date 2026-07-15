@@ -11,11 +11,11 @@ import { TutorModule } from './tutor/tutor.module';
       type: 'mysql',
       host: 'localhost',
       port: 3306,
-      username: 'root',
-      password: '',
-      database: 'quan_ly_sinh_vien',
-      entities: [STUDENT, TUTOR],
-      synchronize: true,
+      username: 'root',              // Tài khoản MySQL của bro
+      password: '',                  // Mật khẩu MySQL của bro (để trống nếu mặc định)
+      database: 'quan_ly_sinh_vien', // Tên database thực tế
+      entities: [STUDENT, TUTOR],    // Đăng ký các Entity
+      synchronize: true,             // Tự động tạo/đồng bộ bảng mới dưới database khi chạy dev
     }),
     SinhVienModule,
     TutorModule,
