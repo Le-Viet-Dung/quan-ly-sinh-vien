@@ -12,23 +12,49 @@ export class SinhVienService {
   ) {}
 
   async create(data: CreateSinhVienDto): Promise<STUDENT> {
-    const newStudent = this.studentRepository.create(data);
+    const { tutorId, subjectIds, ...studentData } = data;
+    const newStudent = this.studentRepository.create(studentData);
+    
+    if (tutorId) {
+      newStudent.tutor = { TID: tutorId } as any;
+    }
+
+    if (subjectIds && subjectIds.length > 0) {
+      newStudent.subjects = subjectIds.map(id => ({ SubID: id } as any));
+    }
+    
     return await this.studentRepository.save(newStudent);
   }
 
   async findAll(): Promise<STUDENT[]> {
-    return await this.studentRepository.find();
+    return await this.studentRepository.find({ 
+      relations: { tutor: true, subjects: true } 
+    });
   }
 
   async findOne(id: number): Promise<STUDENT> {
-    const student = await this.studentRepository.findOne({ where: { SID: id } });
+    const student = await this.studentRepository.findOne({ 
+      where: { SID: id },
+      relations: { tutor: true, subjects: true } 
+    });
     if (!student) throw new NotFoundException(`Không tìm thấy sinh viên ID: ${id}`);
     return student;
   }
 
   async update(id: number, data: CreateSinhVienDto): Promise<STUDENT> {
     const student = await this.findOne(id);
-    Object.assign(student, data);
+    const { tutorId, subjectIds, ...studentData } = data;
+    
+    Object.assign(student, studentData);
+    
+    if (tutorId) {
+      student.tutor = { TID: tutorId } as any;
+    }
+
+    if (subjectIds) {
+      student.subjects = subjectIds.map(id => ({ SubID: id } as any));
+    }
+    
     return await this.studentRepository.save(student);
   }
 

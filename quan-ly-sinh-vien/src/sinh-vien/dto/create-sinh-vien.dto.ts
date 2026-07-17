@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEmail, IsOptional, Length, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, IsOptional, Length, Matches, IsInt, IsArray } from 'class-validator';
 
 export class CreateSinhVienDto {
   @IsNotEmpty({ message: 'Tên sinh viên không được để trống' })
@@ -11,6 +11,15 @@ export class CreateSinhVienDto {
   email?: string;
 
   @IsOptional()
-  @Matches(/(84|0[3|5|7|8|9])+([0-9]{8})\b/, { message: 'Số điện thoại Việt Nam không hợp lệ (03/05/07/08/09/84 kèm 8 số)' })
+  @Matches(/(84|0[3|5|7|8|9])+([0-9]{8})\b/, { message: 'Số điện thoại Việt Nam không hợp lệ' })
   phone?: string;
+
+  @IsOptional()
+  @IsInt({ message: 'ID giảng viên phải là số nguyên' })
+  tutorId?: number;
+
+  @IsOptional()
+  @IsArray({ message: 'Danh sách ID môn học phải là một mảng số' })
+  @IsInt({ each: true, message: 'Mỗi ID môn học phải là số nguyên' })
+  subjectIds?: number[];
 }
