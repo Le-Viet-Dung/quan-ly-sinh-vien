@@ -1,34 +1,33 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
 import { SinhVienService } from './sinh-vien.service';
-import { STUDENT } from '../entities/student.entity';
+import { CreateSinhVienDto } from './dto/create-sinh-vien.dto';
 
 @Controller('sinh-vien')
 export class SinhVienController {
   constructor(private readonly sinhVienService: SinhVienService) {}
 
-  @Get()
-  layDanhSach() {
-    return this.sinhVienService.layDanhSach();
-  }
-
-  @Get(':sid')
-  layChiTiet(@Param('sid') sid: string) {
-    return this.sinhVienService.layChiTiet(sid);
-  }
-
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  themMoi(@Body() duLieuMoi: STUDENT) {
-    return this.sinhVienService.themMoi(duLieuMoi);
+  async create(@Body() body: CreateSinhVienDto) {
+    return await this.sinhVienService.create(body);
   }
 
-  @Put(':sid')
-  capNhat(@Param('sid') sid: string, @Body() duLieuCapNhat: Partial<STUDENT>) {
-    return this.sinhVienService.capNhat(sid, duLieuCapNhat);
+  @Get()
+  async findAll() {
+    return await this.sinhVienService.findAll();
   }
 
-  @Delete(':sid')
-  xoa(@Param('sid') sid: string) {
-    return this.sinhVienService.xoa(sid);
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.sinhVienService.findOne(id);
+  }
+
+  @Put(':id')
+  async update(@Param('id', ParseIntPipe) id: number, @Body() body: CreateSinhVienDto) {
+    return await this.sinhVienService.update(id, body);
+  }
+
+  @Delete(':id')
+  async xoa(@Param('id', ParseIntPipe) id: number) {
+    return await this.sinhVienService.xoa(id);
   }
 }

@@ -1,10 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity()
 export class TUTOR {
   @PrimaryGeneratedColumn()
-  Tutor_id: number;
+  TID: number;
+
+  @Column()
+  name: string;
+
+  @Column({ unique: true })
+  email: string;
 
   @Column({ nullable: true })
-  name: string;
+  phone: string;
 }

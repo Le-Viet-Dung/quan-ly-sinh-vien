@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TUTOR } from '../entities/tutor.entity';
+import { CreateTutorDto } from './dto/create-tutor.dto';
 
 @Injectable()
 export class TutorService {
@@ -10,32 +11,30 @@ export class TutorService {
     private readonly tutorRepository: Repository<TUTOR>,
   ) {}
 
-  async layDanhSach(): Promise<TUTOR[]> {
+  async create(data: CreateTutorDto): Promise<TUTOR> {
+    const newTutor = this.tutorRepository.create(data);
+    return await this.tutorRepository.save(newTutor);
+  }
+
+  async findAll(): Promise<TUTOR[]> {
     return await this.tutorRepository.find();
   }
 
-  async layChiTiet(id: string): Promise<TUTOR> {
-    const tutor = await this.tutorRepository.findOneBy({ Tutor_id: +id });
-    if (!tutor) {
-      throw new NotFoundException(`Không tìm thấy Tutor có ID: ${id}`);
-    }
+  async findOne(id: number): Promise<TUTOR> {
+    const tutor = await this.tutorRepository.findOne({ where: { TID: id } });
+    if (!tutor) throw new NotFoundException(`Không tìm thấy giảng viên ID: ${id}`);
     return tutor;
   }
 
-  async themMoi(duLieuMoi: TUTOR): Promise<TUTOR> {
-    const tutorMoi = this.tutorRepository.create(duLieuMoi);
-    return await this.tutorRepository.save(tutorMoi);
+  async update(id: number, data: CreateTutorDto): Promise<TUTOR> {
+    const tutor = await this.findOne(id);
+    Object.assign(tutor, data);
+    return await this.tutorRepository.save(tutor);
   }
 
-  async capNhat(id: string, duLieuCapNhat: Partial<TUTOR>): Promise<TUTOR> {
-    const tutor = await this.layChiTiet(id);
-    const tutorSauUpdate = this.tutorRepository.merge(tutor, duLieuCapNhat);
-    return await this.tutorRepository.save(tutorSauUpdate);
-  }
-
-  async xoa(id: string): Promise<string> {
-    const tutor = await this.layChiTiet(id);
+  async xoa(id: number): Promise<string> {
+    const tutor = await this.findOne(id);
     await this.tutorRepository.remove(tutor);
-    return `Đã xóa thành công Tutor có ID: ${id}`;
+    return `Đã xóa thành công giảng viên ID: ${id}`;
   }
 }

@@ -1,34 +1,33 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
 import { TutorService } from './tutor.service';
-import { TUTOR } from '../entities/tutor.entity';
+import { CreateTutorDto } from './dto/create-tutor.dto';
 
 @Controller('tutor')
 export class TutorController {
   constructor(private readonly tutorService: TutorService) {}
 
+  @Post()
+  async create(@Body() body: CreateTutorDto) {
+    return await this.tutorService.create(body);
+  }
+
   @Get()
-  layDanhSach() {
-    return this.tutorService.layDanhSach();
+  async findAll() {
+    return await this.tutorService.findAll();
   }
 
   @Get(':id')
-  layChiTiet(@Param('id') id: string) {
-    return this.tutorService.layChiTiet(id);
-  }
-
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  themMoi(@Body() duLieuMoi: TUTOR) {
-    return this.tutorService.themMoi(duLieuMoi);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.tutorService.findOne(id);
   }
 
   @Put(':id')
-  capNhat(@Param('id') id: string, @Body() duLieuCapNhat: Partial<TUTOR>) {
-    return this.tutorService.capNhat(id, duLieuCapNhat);
+  async update(@Param('id', ParseIntPipe) id: number, @Body() body: CreateTutorDto) {
+    return await this.tutorService.update(id, body);
   }
 
   @Delete(':id')
-  xoa(@Param('id') id: string) {
-    return this.tutorService.xoa(id);
+  async xoa(@Param('id', ParseIntPipe) id: number) {
+    return await this.tutorService.xoa(id);
   }
 }

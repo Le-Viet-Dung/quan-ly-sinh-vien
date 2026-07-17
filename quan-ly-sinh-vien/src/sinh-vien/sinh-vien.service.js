@@ -57,7 +57,6 @@ var SinhVienService = /** @class */ (function () {
     function SinhVienService(studentRepository) {
         this.studentRepository = studentRepository;
     }
-    // 1. Lấy toàn bộ danh sách sinh viên
     SinhVienService.prototype.layDanhSach = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -68,7 +67,6 @@ var SinhVienService = /** @class */ (function () {
             });
         });
     };
-    // 2. Lấy chi tiết 1 sinh viên theo SID
     SinhVienService.prototype.layChiTiet = function (sid) {
         return __awaiter(this, void 0, void 0, function () {
             var sinhVien;
@@ -85,7 +83,6 @@ var SinhVienService = /** @class */ (function () {
             });
         });
     };
-    // 3. Thêm mới sinh viên
     SinhVienService.prototype.themMoi = function (duLieuMoi) {
         return __awaiter(this, void 0, void 0, function () {
             var sinhVienMoi;
@@ -99,7 +96,6 @@ var SinhVienService = /** @class */ (function () {
             });
         });
     };
-    // 4. Cập nhật thông tin sinh viên
     SinhVienService.prototype.capNhat = function (sid, duLieuCapNhat) {
         return __awaiter(this, void 0, void 0, function () {
             var sinhVien, sinhVienSauUpdate;
@@ -115,7 +111,6 @@ var SinhVienService = /** @class */ (function () {
             });
         });
     };
-    // 5. Xóa sinh viên khỏi DB
     SinhVienService.prototype.xoa = function (sid) {
         return __awaiter(this, void 0, void 0, function () {
             var sinhVien;

@@ -15,7 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SinhVienController = void 0;
 var common_1 = require("@nestjs/common");
 var sinh_vien_service_1 = require("./sinh-vien.service");
-var student_entity_1 = require("../entities/student.entity");
+var create_sinh_vien_dto_1 = require("./dto/create-sinh-vien.dto");
+var update_sinh_vien_dto_1 = require("./dto/update-sinh-vien.dto");
 var SinhVienController = /** @class */ (function () {
     function SinhVienController(sinhVienService) {
         this.sinhVienService = sinhVienService;
@@ -53,7 +54,7 @@ var SinhVienController = /** @class */ (function () {
         (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
         __param(0, (0, common_1.Body)()),
         __metadata("design:type", Function),
-        __metadata("design:paramtypes", [student_entity_1.STUDENT]),
+        __metadata("design:paramtypes", [create_sinh_vien_dto_1.CreateSinhVienDto]),
         __metadata("design:returntype", void 0)
     ], SinhVienController.prototype, "themMoi", null);
     __decorate([
@@ -61,7 +62,7 @@ var SinhVienController = /** @class */ (function () {
         __param(0, (0, common_1.Param)('sid')),
         __param(1, (0, common_1.Body)()),
         __metadata("design:type", Function),
-        __metadata("design:paramtypes", [String, Object]),
+        __metadata("design:paramtypes", [String, update_sinh_vien_dto_1.UpdateSinhVienDto]),
         __metadata("design:returntype", void 0)
     ], SinhVienController.prototype, "capNhat", null);
     __decorate([

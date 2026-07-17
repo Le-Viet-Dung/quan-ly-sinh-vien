@@ -1,13 +1,16 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity()
 export class SUBJECT {
-  @PrimaryColumn({ length: 10 })
-  Subject_id: string;
+  @PrimaryGeneratedColumn()
+  SubID: number;
 
-  @Column({ length: 50 })
-  Subject_name: string;
+  @Column({ unique: true })
+  subjectCode: string;
 
-  @Column({ type: 'int', default: 3 })
-  Credits: number;
+  @Column()
+  name: string;
+
+  @Column()
+  credits: number;
 }

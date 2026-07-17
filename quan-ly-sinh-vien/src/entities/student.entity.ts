@@ -5,6 +5,12 @@ export class STUDENT {
   @PrimaryGeneratedColumn()
   SID: number;
 
-  @Column({ nullable: true })
+  @Column()
   name: string;
+
+  @Column({ nullable: true })
+  email: string;
+
+  @Column({ nullable: true })
+  phone: string;
 }
