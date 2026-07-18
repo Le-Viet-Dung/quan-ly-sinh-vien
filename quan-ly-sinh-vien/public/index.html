@@ -3,11 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Quản lý Sinh viên</title>
+    <title>Hệ thống Quản lý Toàn diện</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f8f9fa; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 20px; }
+        
+        /* Navigation Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; background: #e9ecef; border-radius: 5px; color: #495057; transition: 0.3s; }
+        .tab-btn.active { background: #007bff; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Button General Styles */
         .btn { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
         .btn:hover { background: #0056b3; }
         .btn-success { background: #28a745; margin-top: 10px; }
@@ -31,230 +40,268 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
         th { background-color: #007bff; color: white; }
+        .tab-content:nth-child(3) th { background-color: #28a745; } /* Đổi màu th của Tutor */
+        .tab-content:nth-child(4) th { background-color: #17a2b8; } /* Đổi màu th của Subject */
         tr:nth-child(even) { background-color: #f2f2f2; }
         .badge { background: #17a2b8; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; display: inline-block; margin: 2px; }
         .empty { color: #888; font-style: italic; }
+        .flex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h2>🎓 Hệ thống Quản lý Sinh viên</h2>
-            <button class="btn" onclick="layDanhSachSinhVien()">🔄 Làm mới danh sách</button>
+            <h2>🏫 Hệ thống Quản lý Trường học Toàn diện</h2>
         </div>
 
-        <!-- Khung Form Thêm/Sửa Sinh Viên -->
-        <div class="form-card">
-            <h3 id="formTitle">➕ Thêm Sinh viên mới</h3>
-            <form id="formSinhVien" onsubmit="xuLySubmitForm(event)">
-                <div class="form-group">
-                    <label>Tên Sinh viên (*)</label>
-                    <input type="text" name="name" required placeholder="Nhập họ và tên...">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" placeholder="Nhập email...">
-                </div>
-                <div class="form-group">
-                    <label>Chọn Giảng viên hướng dẫn</label>
-                    <select name="tutorId" id="tutorSelect">
-                        <option value="">-- Không có --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Chọn Môn học đăng ký</label>
-                    <div class="checkbox-group" id="subjectCheckboxes">
-                        <!-- Checkbox môn học đổ vào đây -->
+        <!-- Menu Tabs Chuyển Đổi -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('sinh-vien-tab')">🎓 Quản lý Sinh viên</button>
+            <button class="tab-btn" onclick="switchTab('tutor-tab')">👨‍🏫 Quản lý Giảng viên</button>
+            <button class="tab-btn" onclick="switchTab('subject-tab')">📚 Quản lý Môn học</button>
+        </div>
+
+        <!-- TAB 1: SINH VIÊN -->
+        <div id="sinh-vien-tab" class="tab-content active">
+            <div class="flex-header">
+                <h3>Danh sách Sinh viên</h3>
+                <button class="btn" onclick="layDanhSachSinhVien()">🔄 Làm mới</button>
+            </div>
+            
+            <div class="form-card">
+                <h4 id="formTitle">➕ Thêm Sinh viên mới</h4>
+                <form id="formSinhVien" onsubmit="xuLySubmitSinhVien(event)">
+                    <div class="form-group">
+                        <label>Tên Sinh viên (*)</label>
+                        <input type="text" name="name" required placeholder="Nhập họ và tên...">
                     </div>
-                </div>
-                <button type="submit" id="submitBtn" class="btn btn-success">Lưu Sinh viên</button>
-                <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="huyCheDoSua()">Hủy</button>
-            </form>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" placeholder="Nhập email...">
+                    </div>
+                    <div class="form-group">
+                        <label>Chọn Giảng viên hướng dẫn</label>
+                        <select name="tutorId" id="tutorSelect">
+                            <option value="">-- Không có --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Chọn Môn học đăng ký</label>
+                        <div class="checkbox-group" id="subjectCheckboxes"></div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn btn-success">Lưu Sinh viên</button>
+                    <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="huyCheDoSua()">Hủy</button>
+                </form>
+            </div>
+            <div id="ket-qua-sinh-vien"></div>
         </div>
 
-        <!-- Khung Danh sách -->
-        <div id="ket-qua">
-            <p>Vui lòng bấm "Làm mới danh sách" để tải dữ liệu.</p>
+        <!-- TAB 2: GIẢNG VIÊN -->
+        <div id="tutor-tab" class="tab-content">
+            <div class="flex-header">
+                <h3>Danh sách Giảng viên</h3>
+                <button class="btn" style="background:#28a745" onclick="layDanhSachTutor()">🔄 Làm mới</button>
+            </div>
+            <div class="form-card">
+                <h4>👨‍🏫 Thêm Giảng viên mới</h4>
+                <form id="formTutor" onsubmit="themTutor(event)">
+                    <div class="form-group">
+                        <label>Tên Giảng viên (*)</label>
+                        <input type="text" name="name" required placeholder="Nhập tên giảng viên...">
+                    </div>
+                    <button type="submit" class="btn btn-success">Thêm Giảng viên</button>
+                </form>
+            </div>
+            <div id="ket-qua-tutor"></div>
+        </div>
+
+        <!-- TAB 3: MÔN HỌC -->
+        <div id="subject-tab" class="tab-content">
+            <div class="flex-header">
+                <h3>Danh sách Môn học</h3>
+                <button class="btn" style="background:#17a2b8" onclick="layDanhSachSubject()">🔄 Làm mới</button>
+            </div>
+            <div class="form-card">
+                <h4>📚 Thêm Môn học mới</h4>
+                <form id="formSubject" onsubmit="themSubject(event)">
+                    <div class="form-group">
+                        <label>Tên Môn học (*)</label>
+                        <input type="text" name="name" required placeholder="Nhập tên môn học...">
+                    </div>
+                    <button type="submit" class="btn btn-success" style="background:#17a2b8">Thêm Môn học</button>
+                </form>
+            </div>
+            <div id="ket-qua-subject"></div>
         </div>
     </div>
 
     <script>
-        // Biến trạng thái để biết đang Thêm mới hay đang Sửa
+        // Các biến trạng thái Sinh viên
         let isEditing = false;
         let editingStudentId = null;
-        let listSinhVienBoNhoDem = []; // Lưu lại danh sách để đổ dữ liệu lên form cho nhanh
+        let listSinhVienBoNhoDem = [];
 
-        // Khởi chạy khi load trang
-        document.addEventListener("DOMContentLoaded", async () => {
+        // Hàm chuyển Tab
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Khởi chạy ban đầu để load toàn bộ dữ liệu
+        document.addEventListener("DOMContentLoaded", () => {
+            taiDuLieuFormSinhVien();
+            layDanhSachSinhVien();
+            layDanhSachTutor();
+            layDanhSachSubject();
+        });
+
+        // Tải danh sách Giảng viên và Môn học đổ vào Form của Sinh viên
+        async function taiDuLieuFormSinhVien() {
             try {
-                const [tutorRes, subjectRes] = await Promise.all([
-                    fetch('/tutor'), fetch('/subject')
-                ]);
+                const [tutorRes, subjectRes] = await Promise.all([fetch('/tutor'), fetch('/subject')]);
                 const tutors = await tutorRes.json();
                 const subjects = await subjectRes.json();
 
                 const tutorSelect = document.getElementById('tutorSelect');
-                tutors.forEach(t => {
-                    tutorSelect.innerHTML += `<option value="${t.TID}">${t.name}</option>`;
-                });
+                tutorSelect.innerHTML = '<option value="">-- Không có --</option>';
+                tutors.forEach(t => { tutorSelect.innerHTML += `<option value="${t.TID}">${t.name}</option>`; });
 
                 const subjectDiv = document.getElementById('subjectCheckboxes');
+                subjectDiv.innerHTML = '';
                 subjects.forEach(s => {
                     subjectDiv.innerHTML += `
                         <label class="checkbox-item">
                             <input type="checkbox" name="subjectIds" value="${s.SubID}"> ${s.name}
-                        </label>
-                    `;
+                        </label>`;
                 });
+            } catch (e) { console.error("Lỗi đồng bộ form sinh viên:", e); }
+        }
 
-                layDanhSachSinhVien();
-            } catch (error) {
-                console.error("Lỗi khi khởi tạo form: ", error);
-            }
-        });
+        // ================= XỬ LÝ SINH VIÊN =================
+        async function layDanhSachSinhVien() {
+            const div = document.getElementById('ket-qua-sinh-vien');
+            div.innerHTML = '<p>Đang tải...</p>';
+            try {
+                const res = await fetch('/sinh-vien');
+                const data = await res.json();
+                listSinhVienBoNhoDem = data;
+                if(data.length === 0) { div.innerHTML = '<p class="empty">Chưa có sinh viên nào.</p>'; return; }
+                
+                let html = `<table><thead><tr><th>ID</th><th>Tên Sinh viên</th><th>Email</th><th>Giảng viên HD</th><th>Môn học</th><th>Hành động</th></tr></thead><tbody>`;
+                data.forEach(sv => {
+                    const tutor = sv.tutor ? sv.tutor.name : '<span class="empty">Chưa có</span>';
+                    const subs = sv.subjects && sv.subjects.length > 0 ? sv.subjects.map(s => `<span class="badge">${s.name}</span>`).join(' ') : '<span class="empty">Trống</span>';
+                    html += `<tr><td>${sv.SID}</td><td><strong>${sv.name}</strong></td><td>${sv.email || ''}</td><td>${tutor}</td><td>${subs}</td>
+                    <td>
+                        <button class="btn btn-warning" style="padding:5px 10px; font-size:12px;" onclick="kichHoatCheDoSua(${sv.SID})">✏️ Sửa</button>
+                        <button class="btn btn-danger" style="padding:5px 10px; font-size:12px;" onclick="xoaSinhVien(${sv.SID},'${sv.name}')">🗑️ Xóa</button>
+                    </td></tr>`;
+                });
+                div.innerHTML = html + '</tbody></table>';
+            } catch(e) { div.innerHTML = '<p style="color:red">Lỗi tải dữ liệu!</p>'; }
+        }
 
-        // Hàm xử lý chung khi Submit Form (Gộp cả Thêm và Sửa)
-        async function xuLySubmitForm(event) {
+        async function xuLySubmitSinhVien(event) {
             event.preventDefault();
             const form = event.target;
-            
-            const name = form.name.value;
-            const email = form.email.value;
-            const tutorId = form.tutorId.value ? parseInt(form.tutorId.value) : null;
-            const checkboxes = form.querySelectorAll('input[name="subjectIds"]:checked');
-            const subjectIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
-
-            const data = { name, email, tutorId, subjectIds };
-
-            // Xác định URL và Method dựa trên trạng thái flows
+            const data = {
+                name: form.name.value,
+                email: form.email.value,
+                tutorId: form.tutorId.value ? parseInt(form.tutorId.value) : null,
+                subjectIds: Array.from(form.querySelectorAll('input[name="subjectIds"]:checked')).map(cb => parseInt(cb.value))
+            };
             const url = isEditing ? `/sinh-vien/${editingStudentId}` : '/sinh-vien';
-            const method = isEditing ? 'PATCH' : 'POST';
-
-            try {
-                const response = await fetch(url, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    alert(isEditing ? 'Cập nhật sinh viên thành công!' : 'Thêm sinh viên thành công!');
-                    huyCheDoSua(); // Reset form về trạng thái thêm mới ban đầu
-                    layDanhSachSinhVien(); // Tải lại bảng
-                } else {
-                    const err = await response.json();
-                    alert('Lỗi: ' + (err.message || 'Thao tác thất bại'));
-                }
-            } catch (error) {
-                alert('Lỗi kết nối tới Server!');
-            }
+            const res = await fetch(url, { method: isEditing ? 'PATCH' : 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+            if(res.ok) { alert('Thao tác thành công!'); huyCheDoSua(); layDanhSachSinhVien(); } else { alert('Thao tác lỗi!'); }
         }
 
-        // Lấy danh sách và vẽ bảng
-        async function layDanhSachSinhVien() {
-            const ketQuaDiv = document.getElementById('ket-qua');
-            ketQuaDiv.innerHTML = '<p>Đang tải dữ liệu...</p>';
-            try {
-                const response = await fetch('/sinh-vien');
-                const data = await response.json();
-                listSinhVienBoNhoDem = data; // Lưu vào bộ nhớ đệm để xài khi bấm nút Sửa
-
-                if (data.length === 0) {
-                    ketQuaDiv.innerHTML = '<p class="empty">Chưa có dữ liệu sinh viên nào.</p>'; return;
-                }
-                let tableHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th><th>Tên Sinh viên</th><th>Email</th><th>Giảng viên HD</th><th>Môn học đăng ký</th><th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                data.forEach(sv => {
-                    const tutorName = sv.tutor ? sv.tutor.name : '<span class="empty">Chưa có</span>';
-                    const subjectsList = sv.subjects && sv.subjects.length > 0 
-                        ? sv.subjects.map(sub => `<span class="badge">${sub.name}</span>`).join(' ') 
-                        : '<span class="empty">Chưa đăng ký</span>';
-                    tableHTML += `
-                        <tr>
-                            <td>${sv.SID}</td><td><strong>${sv.name}</strong></td>
-                            <td>${sv.email || '<span class="empty">Không có</span>'}</td>
-                            <td>${tutorName}</td><td>${subjectsList}</td>
-                            <td>
-                                <button class="btn btn-warning" style="padding: 6px 12px; font-size: 13px; margin-right: 5px;" onclick="kichHoatCheDoSua(${sv.SID})">✏️ Sửa</button>
-                                <button class="btn btn-danger" onclick="xoaSinhVien(${sv.SID}, '${sv.name}')">🗑️ Xóa</button>
-                            </td>
-                        </tr>`;
-                });
-                tableHTML += `</tbody></table>`;
-                ketQuaDiv.innerHTML = tableHTML;
-            } catch (error) {
-                ketQuaDiv.innerHTML = '<p style="color:red;">Lỗi kết nối đến API!</p>';
-            }
-        }
-
-        // Kích hoạt chế độ sửa: Đổ dữ liệu của dòng được chọn lên Form
         function kichHoatCheDoSua(id) {
             const sv = listSinhVienBoNhoDem.find(s => s.SID === id);
             if (!sv) return;
-
-            isEditing = true;
-            editingStudentId = id;
-
-            // Thay đổi giao diện Form sang trạng thái Sửa
-            document.getElementById('formTitle').innerText = `✏️ Cập nhật thông tin Sinh viên (ID: ${id})`;
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.innerText = 'Cập nhật ngay';
-            submitBtn.className = 'btn btn-warning';
+            isEditing = true; editingStudentId = id;
+            document.getElementById('formTitle').innerText = `✏️ Cập nhật Sinh viên (ID: ${id})`;
+            const btn = document.getElementById('submitBtn'); btn.innerText = 'Cập nhật ngay'; btn.className = 'btn btn-warning';
             document.getElementById('cancelBtn').style.display = 'inline-block';
-
-            // Đổ dữ liệu text
-            const form = document.getElementById('formSinhVien');
-            form.name.value = sv.name;
-            form.email.value = sv.email || '';
-            form.tutorId.value = sv.tutor ? sv.tutor.TID : '';
-
-            // Đổ dữ liệu môn học (Checkboxes)
-            const subjectIdsCuaSV = sv.subjects ? sv.subjects.map(sub => sub.SubID) : [];
-            const checkboxes = form.querySelectorAll('input[name="subjectIds"]');
-            checkboxes.forEach(cb => {
-                cb.checked = subjectIdsCuaSV.includes(parseInt(cb.value));
-            });
             
-            // Cuộn màn hình lên trên cùng để người dùng thấy Form đang sửa
+            const form = document.getElementById('formSinhVien');
+            form.name.value = sv.name; form.email.value = sv.email || ''; form.tutorId.value = sv.tutor ? sv.tutor.TID : '';
+            const subIds = sv.subjects ? sv.subjects.map(s => s.SubID) : [];
+            form.querySelectorAll('input[name="subjectIds"]').forEach(cb => cb.checked = subIds.includes(parseInt(cb.value)));
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Hủy chế độ sửa, đưa form về trạng thái Thêm mới ban đầu
         function huyCheDoSua() {
-            isEditing = false;
-            editingStudentId = null;
-
+            isEditing = false; editingStudentId = null;
             document.getElementById('formTitle').innerText = '➕ Thêm Sinh viên mới';
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.innerText = 'Lưu Sinh viên';
-            submitBtn.className = 'btn btn-success';
+            const btn = document.getElementById('submitBtn'); btn.innerText = 'Lưu Sinh viên'; btn.className = 'btn btn-success';
             document.getElementById('cancelBtn').style.display = 'none';
-            
             document.getElementById('formSinhVien').reset();
         }
 
-        // Hàm Xóa Sinh Viên
         async function xoaSinhVien(id, name) {
-            if (!confirm(`Bro có chắc chắn muốn xóa sinh viên [ ${name} ] không?`)) return;
+            if(!confirm(`Xóa sinh viên ${name}?`)) return;
+            if(await fetch(`/sinh-vien/${id}`, {method: 'DELETE'}).then(r => r.ok)) { if(isEditing && editingStudentId===id) huyCheDoSua(); layDanhSachSinhVien(); }
+        }
+
+        // ================= XỬ LÝ GIẢNG VIÊN =================
+        async function layDanhSachTutor() {
+            const div = document.getElementById('ket-qua-tutor');
             try {
-                const response = await fetch(`/sinh-vien/${id}`, { method: 'DELETE' });
-                if (response.ok) {
-                    alert('Đã xóa thành công!');
-                    if(isEditing && editingStudentId === id) huyCheDoSua(); // Nếu đang sửa đúng đứa bị xóa thì reset form
-                    layDanhSachSinhVien();
-                } else {
-                    alert('Lỗi! Không thể xóa.');
-                }
-            } catch (error) {
-                alert('Lỗi kết nối!');
-            }
+                const res = await fetch('/tutor');
+                const data = await res.json();
+                if(data.length === 0) { div.innerHTML = '<p class="empty">Chưa có giảng viên nào.</p>'; return; }
+                let html = `<table><thead><tr><th>TID</th><th>Tên Giảng viên</th><th>Hành động</th></tr></thead><tbody>`;
+                data.forEach(t => {
+                    html += `<tr><td>${t.TID}</td><td><strong>${t.name}</strong></td>
+                    <td><button class="btn btn-danger" style="padding:5px 10px; font-size:12px;" onclick="xoaTutor(${t.TID},'${t.name}')">🗑️ Xóa</button></td></tr>`;
+                });
+                div.innerHTML = html + '</tbody></table>';
+            } catch(e) { div.innerHTML = '<p style="color:red">Lỗi tải dữ liệu!</p>'; }
+        }
+
+        async function themTutor(event) {
+            event.preventDefault();
+            const name = event.target.name.value;
+            const res = await fetch('/tutor', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name}) });
+            if(res.ok) { event.target.reset(); layDanhSachTutor(); taiDuLieuFormSinhVien(); }
+        }
+
+        async function xoaTutor(id, name) {
+            if(!confirm(`Xóa giảng viên ${name}? Lưu ý: Những sinh viên thuộc giảng viên này sẽ trở về trạng thái "Chưa có" giảng viên hướng dẫn.`)) return;
+            const res = await fetch(`/tutor/${id}`, { method: 'DELETE' });
+            if(res.ok) { layDanhSachTutor(); layDanhSachSinhVien(); taiDuLieuFormSinhVien(); } else { alert('Không thể xóa giảng viên này!'); }
+        }
+
+        // ================= XỬ LÝ MÔN HỌC =================
+        async function layDanhSachSubject() {
+            const div = document.getElementById('ket-qua-subject');
+            try {
+                const res = await fetch('/subject');
+                const data = await res.json();
+                if(data.length === 0) { div.innerHTML = '<p class="empty">Chưa có môn học nào.</p>'; return; }
+                let html = `<table><thead><tr><th>SubID</th><th>Tên Môn học</th><th>Hành động</th></tr></thead><tbody>`;
+                data.forEach(s => {
+                    html += `<tr><td>${s.SubID}</td><td><strong>${s.name}</strong></td>
+                    <td><button class="btn btn-danger" style="padding:5px 10px; font-size:12px;" onclick="xoaSubject(${s.SubID},'${s.name}')">🗑️ Xóa</button></td></tr>`;
+                });
+                div.innerHTML = html + '</tbody></table>';
+            } catch(e) { div.innerHTML = '<p style="color:red">Lỗi tải dữ liệu!</p>'; }
+        }
+
+        async function themSubject(event) {
+            event.preventDefault();
+            const name = event.target.name.value;
+            const res = await fetch('/subject', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name}) });
+            if(res.ok) { event.target.reset(); layDanhSachSubject(); taiDuLieuFormSinhVien(); }
+        }
+
+        async function xoaSubject(id, name) {
+            if(!confirm(`Xóa môn học ${name}?`)) return;
+            const res = await fetch(`/subject/${id}`, { method: 'DELETE' });
+            if(res.ok) { layDanhSachSubject(); layDanhSachSinhVien(); taiDuLieuFormSinhVien(); } else { alert('Không thể xóa môn học này!'); }
         }
     </script>
 </body>
