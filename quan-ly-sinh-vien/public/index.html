@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Quản lý Sinh viên</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f8f9fa; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 20px; }
+        .btn { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; margin-top: 10px; }
+        .btn-success:hover { background: #218838; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-danger { background: #dc3545; padding: 6px 12px; font-size: 13px; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-secondary { background: #6c757d; margin-top: 10px; margin-left: 5px; }
+        .btn-secondary:hover { background: #5a6268; }
+        
+        /* Form Styles */
+        .form-card { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .form-group input[type="text"], .form-group input[type="email"], .form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; }
+        .checkbox-item { background: #fff; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; }
+        
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .badge { background: #17a2b8; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; display: inline-block; margin: 2px; }
+        .empty { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🎓 Hệ thống Quản lý Sinh viên</h2>
+            <button class="btn" onclick="layDanhSachSinhVien()">🔄 Làm mới danh sách</button>
+        </div>
+
+        <!-- Khung Form Thêm/Sửa Sinh Viên -->
+        <div class="form-card">
+            <h3 id="formTitle">➕ Thêm Sinh viên mới</h3>
+            <form id="formSinhVien" onsubmit="xuLySubmitForm(event)">
+                <div class="form-group">
+                    <label>Tên Sinh viên (*)</label>
+                    <input type="text" name="name" required placeholder="Nhập họ và tên...">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="Nhập email...">
+                </div>
+                <div class="form-group">
+                    <label>Chọn Giảng viên hướng dẫn</label>
+                    <select name="tutorId" id="tutorSelect">
+                        <option value="">-- Không có --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Chọn Môn học đăng ký</label>
+                    <div class="checkbox-group" id="subjectCheckboxes">
+                        <!-- Checkbox môn học đổ vào đây -->
+                    </div>
+                </div>
+                <button type="submit" id="submitBtn" class="btn btn-success">Lưu Sinh viên</button>
+                <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="huyCheDoSua()">Hủy</button>
+            </form>
+        </div>
+
+        <!-- Khung Danh sách -->
+        <div id="ket-qua">
+            <p>Vui lòng bấm "Làm mới danh sách" để tải dữ liệu.</p>
+        </div>
+    </div>
+
+    <script>
+        // Biến trạng thái để biết đang Thêm mới hay đang Sửa
+        let isEditing = false;
+        let editingStudentId = null;
+        let listSinhVienBoNhoDem = []; // Lưu lại danh sách để đổ dữ liệu lên form cho nhanh
+
+        // Khởi chạy khi load trang
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const [tutorRes, subjectRes] = await Promise.all([
+                    fetch('/tutor'), fetch('/subject')
+                ]);
+                const tutors = await tutorRes.json();
+                const subjects = await subjectRes.json();
+
+                const tutorSelect = document.getElementById('tutorSelect');
+                tutors.forEach(t => {
+                    tutorSelect.innerHTML += `<option value="${t.TID}">${t.name}</option>`;
+                });
+
+                const subjectDiv = document.getElementById('subjectCheckboxes');
+                subjects.forEach(s => {
+                    subjectDiv.innerHTML += `
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="subjectIds" value="${s.SubID}"> ${s.name}
+                        </label>
+                    `;
+                });
+
+                layDanhSachSinhVien();
+            } catch (error) {
+                console.error("Lỗi khi khởi tạo form: ", error);
+            }
+        });
+
+        // Hàm xử lý chung khi Submit Form (Gộp cả Thêm và Sửa)
+        async function xuLySubmitForm(event) {
+            event.preventDefault();
+            const form = event.target;
+            
+            const name = form.name.value;
+            const email = form.email.value;
+            const tutorId = form.tutorId.value ? parseInt(form.tutorId.value) : null;
+            const checkboxes = form.querySelectorAll('input[name="subjectIds"]:checked');
+            const subjectIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            const data = { name, email, tutorId, subjectIds };
+
+            // Xác định URL và Method dựa trên trạng thái flows
+            const url = isEditing ? `/sinh-vien/${editingStudentId}` : '/sinh-vien';
+            const method = isEditing ? 'PATCH' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert(isEditing ? 'Cập nhật sinh viên thành công!' : 'Thêm sinh viên thành công!');
+                    huyCheDoSua(); // Reset form về trạng thái thêm mới ban đầu
+                    layDanhSachSinhVien(); // Tải lại bảng
+                } else {
+                    const err = await response.json();
+                    alert('Lỗi: ' + (err.message || 'Thao tác thất bại'));
+                }
+            } catch (error) {
+                alert('Lỗi kết nối tới Server!');
+            }
+        }
+
+        // Lấy danh sách và vẽ bảng
+        async function layDanhSachSinhVien() {
+            const ketQuaDiv = document.getElementById('ket-qua');
+            ketQuaDiv.innerHTML = '<p>Đang tải dữ liệu...</p>';
+            try {
+                const response = await fetch('/sinh-vien');
+                const data = await response.json();
+                listSinhVienBoNhoDem = data; // Lưu vào bộ nhớ đệm để xài khi bấm nút Sửa
+
+                if (data.length === 0) {
+                    ketQuaDiv.innerHTML = '<p class="empty">Chưa có dữ liệu sinh viên nào.</p>'; return;
+                }
+                let tableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Tên Sinh viên</th><th>Email</th><th>Giảng viên HD</th><th>Môn học đăng ký</th><th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                data.forEach(sv => {
+                    const tutorName = sv.tutor ? sv.tutor.name : '<span class="empty">Chưa có</span>';
+                    const subjectsList = sv.subjects && sv.subjects.length > 0 
+                        ? sv.subjects.map(sub => `<span class="badge">${sub.name}</span>`).join(' ') 
+                        : '<span class="empty">Chưa đăng ký</span>';
+                    tableHTML += `
+                        <tr>
+                            <td>${sv.SID}</td><td><strong>${sv.name}</strong></td>
+                            <td>${sv.email || '<span class="empty">Không có</span>'}</td>
+                            <td>${tutorName}</td><td>${subjectsList}</td>
+                            <td>
+                                <button class="btn btn-warning" style="padding: 6px 12px; font-size: 13px; margin-right: 5px;" onclick="kichHoatCheDoSua(${sv.SID})">✏️ Sửa</button>
+                                <button class="btn btn-danger" onclick="xoaSinhVien(${sv.SID}, '${sv.name}')">🗑️ Xóa</button>
+                            </td>
+                        </tr>`;
+                });
+                tableHTML += `</tbody></table>`;
+                ketQuaDiv.innerHTML = tableHTML;
+            } catch (error) {
+                ketQuaDiv.innerHTML = '<p style="color:red;">Lỗi kết nối đến API!</p>';
+            }
+        }
+
+        // Kích hoạt chế độ sửa: Đổ dữ liệu của dòng được chọn lên Form
+        function kichHoatCheDoSua(id) {
+            const sv = listSinhVienBoNhoDem.find(s => s.SID === id);
+            if (!sv) return;
+
+            isEditing = true;
+            editingStudentId = id;
+
+            // Thay đổi giao diện Form sang trạng thái Sửa
+            document.getElementById('formTitle').innerText = `✏️ Cập nhật thông tin Sinh viên (ID: ${id})`;
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerText = 'Cập nhật ngay';
+            submitBtn.className = 'btn btn-warning';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+
+            // Đổ dữ liệu text
+            const form = document.getElementById('formSinhVien');
+            form.name.value = sv.name;
+            form.email.value = sv.email || '';
+            form.tutorId.value = sv.tutor ? sv.tutor.TID : '';
+
+            // Đổ dữ liệu môn học (Checkboxes)
+            const subjectIdsCuaSV = sv.subjects ? sv.subjects.map(sub => sub.SubID) : [];
+            const checkboxes = form.querySelectorAll('input[name="subjectIds"]');
+            checkboxes.forEach(cb => {
+                cb.checked = subjectIdsCuaSV.includes(parseInt(cb.value));
+            });
+            
+            // Cuộn màn hình lên trên cùng để người dùng thấy Form đang sửa
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Hủy chế độ sửa, đưa form về trạng thái Thêm mới ban đầu
+        function huyCheDoSua() {
+            isEditing = false;
+            editingStudentId = null;
+
+            document.getElementById('formTitle').innerText = '➕ Thêm Sinh viên mới';
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerText = 'Lưu Sinh viên';
+            submitBtn.className = 'btn btn-success';
+            document.getElementById('cancelBtn').style.display = 'none';
+            
+            document.getElementById('formSinhVien').reset();
+        }
+
+        // Hàm Xóa Sinh Viên
+        async function xoaSinhVien(id, name) {
+            if (!confirm(`Bro có chắc chắn muốn xóa sinh viên [ ${name} ] không?`)) return;
+            try {
+                const response = await fetch(`/sinh-vien/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('Đã xóa thành công!');
+                    if(isEditing && editingStudentId === id) huyCheDoSua(); // Nếu đang sửa đúng đứa bị xóa thì reset form
+                    layDanhSachSinhVien();
+                } else {
+                    alert('Lỗi! Không thể xóa.');
+                }
+            } catch (error) {
+                alert('Lỗi kết nối!');
+            }
+        }
+    </script>
+</body>
+</html>
